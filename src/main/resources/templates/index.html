@@ -1,0 +1,194 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Spring Boot Thymeleaf Hello World Example</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Magneto wants you</a>
+</nav>
+
+<main role="main" class="container">
+
+    <div class="starter-template">
+        <br/><br/><br/>
+        <div class="starter-template">
+            <br/>
+            <div class="alert alert-primary" role="alert" style="display:none">
+                <h4 class="alert-heading">Well done!</h4>
+                <p id="summary">we have found</p>
+            </div>
+            <div class="alert alert-danger" role="alert" style="display:none">
+                <h4 class="alert-heading">Validation error</h4>
+                <hr/>
+                <p> An error occurs please read the instructions or contact your system administrator</p>
+            </div>
+            <div class="alert alert-success" role="alert"  style="display:none">
+                It is a Mutant
+            </div>
+            <div class="alert alert-dark" role="alert"  style="display:none">
+                It is a Human
+            </div>
+        <h2>
+            DNA Code
+            <form>
+                <table id="dnaTable">
+                    <tr>
+                        <td>
+                            <input type="text" id="inputDNA1" name="inputDNA" onkeypress="return validate(event)" onblur="this.value = this.value.toUpperCase()" />
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </h2>
+        <input type="button" value = "Add Input" onclick="addNewRow()" class="btn btn-link"/>
+        <input type="button" value = "Delete Input" onclick="deleteLastRow()" class="btn btn-link">
+        <br/>
+        <input type="button" value = "Identify" onclick="isMutant()" class="btn btn-dark">
+        <input type="button" value = "How Many Mutant" onclick="howManyMutant()" class="btn btn-dark">
+        <br/><br/>
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">Instructions</h4>
+            <hr/>
+            <p>the valid nitrogenous base characters are A, C, G, T</p>
+            <p>the minimum amount of nitrogenous base characters is 5 per input</p>
+            <p>the minimum amount of inputs is the same of nitrogenous base characters, to add a new input click on "Add Input" button</p>
+        </div>
+
+    </div>
+
+</main>
+
+<script type="text/javascript" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.js" /></script>
+<script>
+    /*validate number of input text */
+    function validate(event){
+        let result = false;
+        let lastCharacter = String.fromCharCode(event.keyCode).toUpperCase();
+
+        if(
+            lastCharacter =="A" ||
+            lastCharacter =="C" ||
+            lastCharacter =="G" ||
+            lastCharacter =="T" ||
+            event.keyCode == 46
+        ){
+            result = true;
+        }
+        return result;
+    }
+
+    /* add new table row and input at bottom of the table */
+    function addNewRow(){
+        let newTd = $("#dnaTable>tbody>tr").html();
+        $("#dnaTable>tbody").append(function (){
+            return "<tr>"+newTd.replace('1', ($("#dnaTable>tbody").children().length+1)+'' )+"</tr>";
+        });
+    }
+
+    /* delete the las and table row */
+    function deleteLastRow() {
+        let children=$("#dnaTable>tbody").children();
+        let childrenSize = children.length
+
+        if(childrenSize > 1){
+            children[childrenSize-1].remove();
+        }else {
+            $("input[type=text]")[0].value=''
+        }
+    }
+
+    /*validate structure in order to send it to Back End side*/
+    function validateDNA(){
+        let result = true;
+        let  allInput = $("input[type=text]");
+
+
+        if (allInput.length<5){
+            result= false;
+        }else{
+            for (i = 0; i < allInput.length; i++){
+                if (allInput[i].value.length != allInput.length){
+                    $("#"+allInput[i].id).css("border-color", "red");
+                    result= false;
+                }else{
+                    $("#"+allInput[i].id).css("border-color", "");
+                }
+            }
+        }
+
+        if (!result){
+            showMessage("alert-danger",null);
+        }
+        return result
+    }
+
+    /* ajax that verify if a person is a mutant through DNA sequence  */
+    function isMutant(){
+        if(validateDNA()){
+            var dnaSequence = [];
+            let  allInput = $("input[type=text]");
+
+            for (i = 0; i < allInput.length; i++){
+                dnaSequence[i] = allInput[i].value;
+            }
+
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                url: "mutant",
+                data: JSON.stringify(dnaSequence),
+                method: "POST"
+            }).done(function() {
+                showMessage("alert-success",null);
+            }).fail(function() {
+                showMessage("alert-dark",null);
+            }).always(function() {
+                let  allInput = $("input[type=text]");
+
+                for (i = 0; i < allInput.length; i++){
+                    deleteLastRow();
+                }
+            });
+        }
+    }
+    /* it recovers the amount of human, mutant and average */
+    function howManyMutant(){
+          $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                url: "stats",
+                method: "GET"
+            }).done(function( data ) {
+                showMessage("alert-primary","We have found "+data.count_mutant_dna+" mutants and "+data.count_human_dna+" humans so, we have a average of "+(data.ratio*100).toFixed(2))+"%";
+            }).fail(function() {
+                showMessage("alert-danger",null);
+            });
+    }
+
+    /* it manages all user message box on app*/
+    function showMessage(classType, message){
+        if(message!=null){
+            $("#summary").html(message);
+        }
+        $("."+classType).show("slow");
+        setTimeout(function(){
+            $("."+classType).hide("slow");
+        },5000,"JavaScript");
+    }
+</script>
+</body>
+</html>
