@@ -33,9 +33,9 @@ MagnetoWantsYou\src\main\resources
 
 The properties that you have to change are those, the local database connection url and port, username and password respectively 
 
-spring.datasource.url=jdbc:postgresql://localhost:5432/mutants
-spring.datasource.username = sarasa
-spring.datasource.password = sarasa
+    spring.datasource.url=jdbc:postgresql://localhost:5432/mutants
+    spring.datasource.username = sarasa
+    spring.datasource.password = sarasa
 
 3 - Run the code
 
