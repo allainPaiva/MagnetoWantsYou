@@ -17,13 +17,13 @@ Postgresql 9.4
 Run Instructions
 1 - create a database on posgresql using this sql 
 
-CREATE TABLE mutants
-(
-  id_mutant bigint NOT NULL,
-  is_mutant boolean,
-  nitrogenous_base character varying(255),
-  CONSTRAINT mutants_pkey PRIMARY KEY (id_mutant)
-);
+    CREATE TABLE mutants
+    (
+      id_mutant bigint NOT NULL,
+      is_mutant boolean,
+      nitrogenous_base character varying(255),
+      CONSTRAINT mutants_pkey PRIMARY KEY (id_mutant)
+    );
 
 2 - change database connection parameters on applicartion.properties
 
@@ -45,7 +45,7 @@ To run the code you have to run these three command on command line prompt
       mvn dependency:tree
       mvn spring-boot:run
 
-The code creates automatically the table mutants on database due to JPA mapping
+The code should creates automatically the table mutants on database due to JPA mapping
 
 Then you can use the application on browser on URL
 
