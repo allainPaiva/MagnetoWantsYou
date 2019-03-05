@@ -119,7 +119,7 @@ public class MutantService{
         }
 
         //is a no-mutant
-        return position[0]!=-1? position : null;
+        return (position!=null && position[0]!=-1)? position : null;
     }
 
     /**
